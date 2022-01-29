@@ -1,27 +1,7 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-// import { thisExpression } from '@babel/types';
-// import { response } from 'express';
-
-// function App() {
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <p>
-//           Edit <code>src/App.js</code> and save to reload.
-//         </p>
-//         <a
-//           className="App-link"
-//           href="https://reactjs.org"
-//           target="_blank"
-//           rel="noopener noreferrer"
-//         >
-//           Recap
-//         </a>
-//       </header>
-//     </div>
-//   );
-// }
+import Loading from './Loading';
+import { throwStatement } from '@babel/types';
 
 
 class App extends Component {
@@ -29,16 +9,29 @@ class App extends Component {
     super(props)
     //state
     this.state = {
-      users: []
-    }
+      users: [],
+      loading: false,
+    };
+    //bind
+    this.hangleSubmit = this.hangleSubmit.bind(this);
   }
 
   getUsers(){
+    this.setState({
+      loading: true
+    })
     axios('https://api.randomuser.me/?nat=US&results=5')
     .then(response => this.setState({
-      users: response.data.results
+      users: [...this.state.users, ...response.data.results],
+      loading: false
     })
    );
+  }
+
+  hangleSubmit(e) {
+    e.preventDefault();
+    this.getUsers();
+    console.log('more users loaded');
   }
 
   UNSAFE_componentWillMount() {
@@ -46,15 +39,25 @@ class App extends Component {
   }
 
   render(){
-    return <div className="App">{this.state.users.map(user => 
-    <div>
-      <h3>{user.name.first}</h3>
-      <p>{user.cell}</p>
-      <p>{user.email}</p>
-      <hr />
-    </div>
-    )}</div>;
+    
+    return (
+    <div className="App">
+     {!this.state.loading 
+      ? this.state.users.map(user => (
+        <div>
+          <h3>{user.name.first}</h3>
+          <p>{user.cell}</p>
+          <p>{user.email}</p>
+          <form onSubmit={this.handleSubmit}>
+            <input type="submit" value="load users" />
+          </form>
+          <hr />
+        </div>
+       ))
+      : <Loading message="one sec, your data is brewing"/>}
+     </div>
+     );
+    }
   }
-}
 
 export default App;
